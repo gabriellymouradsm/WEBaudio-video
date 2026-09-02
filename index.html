@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analisador de Espectro de Áudio & Vídeo</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 10v3"/>
+          <path d="M6 6v11"/>
+          <path d="M10 3v18"/>
+          <path d="M14 8v7"/>
+          <path d="M18 5v13"/>
+          <path d="M22 10v3"/>
+        </svg>
+      </div>
+      <h1>Analisador de Espectro</h1>
+    </header>
+
+    <main class="app-main">
+      <!-- Upload Section -->
+      <section class="card upload-card" id="upload-section">
+        <label for="file-input" class="drop-zone" id="drop-zone">
+          <div class="drop-zone-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <span class="drop-zone-text">Escolha um arquivo de áudio ou vídeo</span>
+          <span class="drop-zone-subtext">MP3, WAV, OGG, MP4, WebM, etc.</span>
+          <input type="file" id="file-input" accept="audio/*,video/*" class="file-input">
+        </label>
+      </section>
+
+      <!-- Media Display & Visualizer Section -->
+      <section class="card media-card hidden" id="media-section">
+        <div class="file-info-bar">
+          <span class="file-name" id="file-name">Nenhum arquivo selecionado</span>
+          <button class="btn btn-icon btn-secondary" id="btn-change-file" title="Trocar arquivo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+              <path d="M16 21h5v-5"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="player-visualizer-wrapper">
+          <video id="video-element" class="video-preview hidden" playsinline></video>
+          <audio id="audio-element" class="hidden"></audio>
+
+          <div class="canvas-container">
+            <canvas id="spectrum-canvas"></canvas>
+            <div class="visualizer-overlay" id="visualizer-placeholder">
+              <span>Clique em Play para iniciar a análise</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Controls Bar -->
+        <div class="controls-bar">
+          <button class="btn btn-primary btn-play" id="btn-play-pause">
+            <svg id="icon-play" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <svg id="icon-pause" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="4" width="4" height="16"/>
+              <rect x="14" y="4" width="4" height="16"/>
+            </svg>
+            <span id="play-btn-text">Reproduzir</span>
+          </button>
+
+          <div class="timeline-container">
+            <span class="time-display" id="time-current">00:00</span>
+            <input type="range" id="seek-bar" min="0" max="100" value="0" step="0.1" class="slider seek-bar">
+            <span class="time-display" id="time-total">00:00</span>
+          </div>
+
+          <div class="volume-container">
+            <button class="btn btn-icon btn-ghost" id="btn-mute" title="Mute/Unmute">
+              <svg id="icon-volume" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              </svg>
+            </button>
+            <input type="range" id="volume-bar" min="0" max="1" value="1" step="0.05" class="slider volume-bar">
+          </div>
+        </div>
+
+        <!-- Visualizer Settings -->
+        <div class="visualizer-settings">
+          <label class="setting-item">
+            <span>Modo de Visualização:</span>
+            <select id="visualizer-mode" class="select-input">
+              <option value="bars">Barras de Frequência</option>
+              <option value="waveform">Forma de Onda (Osciloscópio)</option>
+              <option value="circle">Espectro Circular</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <!-- Frequency Generator Section (Terapia Alternativa) -->
+      <section class="card therapy-card">
+        <div class="card-header">
+          <h2>Frequência de Terapia Alternativa</h2>
+          <label class="switch">
+            <input type="checkbox" id="toggle-frequency">
+            <span class="slider-switch"></span>
+          </label>
+        </div>
+
+        <p class="section-desc">Ative e ajuste um tom puro de fundo para sobrepor ao seu áudio/vídeo.</p>
+
+        <div class="therapy-body" id="therapy-controls">
+          <!-- Preset Frequencies -->
+          <div class="presets-grid">
+            <button class="preset-btn" data-freq="174">174 Hz <span class="preset-desc">Alívio da dor</span></button>
+            <button class="preset-btn" data-freq="285">285 Hz <span class="preset-desc">Regeneração</span></button>
+            <button class="preset-btn" data-freq="396">396 Hz <span class="preset-desc">Libertação</span></button>
+            <button class="preset-btn" data-freq="417">417 Hz <span class="preset-desc">Transformação</span></button>
+            <button class="preset-btn active" data-freq="432">432 Hz <span class="preset-desc">Harmonia Natural</span></button>
+            <button class="preset-btn" data-freq="528">528 Hz <span class="preset-desc">Milagres / DNA</span></button>
+            <button class="preset-btn" data-freq="639">639 Hz <span class="preset-desc">Relacionamentos</span></button>
+            <button class="preset-btn" data-freq="741">741 Hz <span class="preset-desc">Despertar Intuição</span></button>
+            <button class="preset-btn" data-freq="852">852 Hz <span class="preset-desc">Ordem Espiritual</span></button>
+            <button class="preset-btn" data-freq="963">963 Hz <span class="preset-desc">Conexão Divina</span></button>
+          </div>
+
+          <!-- Custom Frequency Controls -->
+          <div class="freq-adjust-container">
+            <div class="freq-input-group">
+              <label for="custom-freq-input">Frequência Personalizada (Hz):</label>
+              <div class="input-with-suffix">
+                <input type="number" id="custom-freq-input" min="20" max="20000" value="432" step="0.1">
+                <span>Hz</span>
+              </div>
+            </div>
+
+            <div class="freq-slider-group">
+              <label for="freq-slider">Ajuste Fino:</label>
+              <input type="range" id="freq-slider" min="100" max="1000" value="432" step="1" class="slider">
+            </div>
+
+            <div class="freq-volume-group">
+              <label for="freq-volume">Volume do Tom: <span id="freq-vol-value">30%</span></label>
+              <input type="range" id="freq-volume" min="0" max="1" value="0.3" step="0.01" class="slider">
+            </div>
+
+            <div class="wave-type-group">
+              <label for="wave-type-select">Tipo de Onda:</label>
+              <select id="wave-type-select" class="select-input">
+                <option value="sine">Senoidal (Suave - Padrão)</option>
+                <option value="triangle">Triangular (Warm)</option>
+                <option value="square">Quadrada (Brilhante)</option>
+                <option value="sawtooth">Dente de Serra (Encorpado)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Export Section -->
+      <section class="card export-card">
+        <div class="card-header">
+          <h2>Salvar Áudio Processado</h2>
+        </div>
+        <p class="section-desc">Gere e baixe um novo arquivo de áudio incluindo a frequência de terapia adicionada.</p>
+
+        <div class="export-actions">
+          <button class="btn btn-accent" id="btn-export-audio">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <span>Processar e Baixar Áudio</span>
+          </button>
+          <div id="export-status" class="export-status hidden">
+            <div class="spinner hidden" id="export-spinner"></div>
+            <span id="export-status-text">Processando áudio...</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>Analisador de Espectro & Terapia Sonora &bull; SPA HTML5 Web Audio API</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
